@@ -56,8 +56,92 @@ class Application():
         self.status.insert(pos, "["+info+"]"+message+"\n")
         self.status.configure(state=DISABLED)
 
+    def input(self,message):
+        """Metodo usado para tratar uma instrução comando
+            Retorna o que será exibido no servidor"""
 
-        
+        #primeiro vamos remover todos os espaços em branco antes do /
+        while message[0] == " ":
+            message = message[1:]
+        #agora pegamos o comando e salvamos numa variavel
+        instruction = message.split(" ")[0]
+        if instruction == "/server":
+            return out_server()
+        elif instruction == "/data":
+            return out_data()
+        elif instruction == "/ip":
+            return out_ip()
+        elif instruction == "/mac":
+            return out_mac()
+        elif instruction == "/sys":
+            return out_sys()
+        elif instruction == "/dev":
+            return out_dev()
+        elif instruction == "/info":
+            return out_info()
+        elif instruction == "/dolar":
+            return out_dolar()
+        elif instruction == "/calc":
+            return out_calc()
+        elif instruction == "/help":
+            return out_help()
+        else:
+            return out_error()
+
+    def out_server(self):
+        """Método que retornará a saida do comando /server"""
+        pass
+
+    def out_data(self):
+        """Método que retornará a saida do comando /data"""
+        pass
+
+    def out_ip(self):
+        """Funcão que retornará a saida o do comando /ip"""
+        pass
+
+    def out_mac(self):
+        """Método que retornará a saida do comando /mac"""
+        pass
+
+    def out_sys(self):
+        """Método que retornará a saida do comando /sys"""
+        pass
+
+    def out_dev(self):
+        """Método que retornará a saida do comando /dev"""
+        return 'Desenvolvido por:\nÊndril "Awak3n" Castilho' \
+               '\nFernando "Alemão de Troia" Kudrna,' \
+               '\nLeonardo "Darth" Pellegrini'
+
+    def out_info(self):
+        """Funcão que retornará a saida o do comando /info"""
+        pass
+
+    def out_dolar(self):
+        """Método que retornará a saida do comando /dolar"""
+        pass
+
+    def out_calc(self):
+        """Método que retornará a saida do comando /calc"""
+        pass
+
+    def out_help(self):
+        return "/server     Retorna o nome do servidor\n" \
+               "/data       Reotrna a data do sistema do servidor\n" \
+               "/ip         Retorna o endereço IP do servidor\n" \
+               "/mac        Retorna o endereço MAC do servidor\n" \
+               "/sys        Retorna a descrição do sistema operacional do servidor\n" \
+               "/dev        Retorna o nome dos desenvolvedores\n" \
+               "/info       Retorna mensagens gerais do sistema\n" \
+               "/dolar      Retorna a cotação do dólar\n" \
+               "/calc       Retorna o resultado de uma operação algébrica\n" \
+               "            <operando> <operação> <operando>\n"
+
+    def out_error(self):
+        """Método que retornará a saida do erro"""
+        return "Erro - Comando não encontrado"
+
 #inicialização do programa
 if __name__ == '__main__':
     root = Tk()
