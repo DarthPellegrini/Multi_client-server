@@ -138,8 +138,41 @@ class Application():
         is_a_number = ["0","1","2","3","4","5","6","7","8","9",",","."]
         # definiremos as operações conhecidas
         is_a_operator = ["+","-","/","*"]
-        op1 =
-        return
+        # retiramos todos os espaços da string se houverem
+        string.strip(' ')
+        # começaremos agora a lógica de busca dos operandos
+        firstOp = True
+        op1 = ""
+        op2 = ""
+        operator = ""
+        for caractere in string:
+            if caractere in is_a_number:
+                if caractere == ",":
+                    caractere = "."
+                if firstOp == True:
+                    op1 += caractere
+                else:
+                    op2 += caractere
+            elif caractere in is_a_operator:
+                operator = caractere
+                firstOp = False
+        # convertemos os operandos para
+        try:
+            op1 = float(op1)
+            op2 = float(op2)
+        except:
+            return "Erro - Um ou mais operandos são inválidos"
+        if operator == "":
+            return "Erro - Operador não encontrado"
+        elif operator == "+":
+            return op1 + op2
+        elif operator == "-":
+            return op1 - op2
+        elif operator == "/":
+            return op1 / op2
+        elif operator == "*":
+            return op1 * op2
+
 
     def out_help(self):
         return "/server     Retorna o nome do servidor\n" \
