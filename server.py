@@ -124,8 +124,7 @@ class Application():
         # pegando a requisição no formato json e jogando o texto na variavel valoratual
         valoratual = json.loads(rqs.text)
         # pega o retorno json busca a chave valores para pegar o preço do dolar
-        return "R$ %s" % valoratual['valores']['USD']['valor']
-        pass
+        return valoratual['valores']['USD']['valor']
 
     def out_calc(self,string):
         """Método que retornará a saida do comando /calc"""
