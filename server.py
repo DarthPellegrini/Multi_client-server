@@ -2,6 +2,8 @@ try:
     import socket
     import datetime
     import threading
+    import requests
+    import json
     from tkinter import *
     from tkinter import ttk
     from tkinter import messagebox
@@ -60,9 +62,6 @@ class Application():
         """Metodo usado para tratar uma instrução comando
             Retorna o que será exibido no servidor"""
 
-        #primeiro vamos remover todos os espaços em branco antes do /
-        while message[0] == " ":
-            message = message[1:]
         #agora pegamos o comando e salvamos numa variavel
         instruction = message.split(" ")[0]
         if instruction == "/server":
@@ -120,6 +119,12 @@ class Application():
 
     def out_dolar(self):
         """Método que retornará a saida do comando /dolar"""
+        # mandando uma requisição em  get para a api
+        rqs = requests.get('http://api.promasters.net.br/cotacao/v1/valores')
+        # pegando a requisição no formato json e jogando o texto na variavel valoratual
+        valoratual = json.loads(rqs.text)
+        # pega o retorno json busca a chave valores para pegar o preço do dolar
+        return "R$ %s" % valoratual['valores']['USD']['valor']
         pass
 
     def out_calc(self):
