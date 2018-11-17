@@ -81,7 +81,7 @@ class Application():
         elif instruction == "/dolar":
             return out_dolar()
         elif instruction == "/calc":
-            return out_calc()
+            return out_calc(message)
         elif instruction == "/help":
             return out_help()
         else:
@@ -127,9 +127,19 @@ class Application():
         return "R$ %s" % valoratual['valores']['USD']['valor']
         pass
 
-    def out_calc(self):
+    def out_calc(self,string):
         """Método que retornará a saida do comando /calc"""
-        pass
+        # primeiro vamos remover o /calc da string
+        string = string[5:]
+        # agora vamos remover todos os espaços em branco antes do primeiro operando se houverem
+        while string[0] == " ":
+            string = string[1:]
+        # definiremos o que são os números aceitos (caracteres)
+        is_a_number = ["0","1","2","3","4","5","6","7","8","9",",","."]
+        # definiremos as operações conhecidas
+        is_a_operator = ["+","-","/","*"]
+        op1 =
+        return
 
     def out_help(self):
         return "/server     Retorna o nome do servidor\n" \
@@ -141,7 +151,7 @@ class Application():
                "/info       Retorna mensagens gerais do sistema\n" \
                "/dolar      Retorna a cotação do dólar\n" \
                "/calc       Retorna o resultado de uma operação algébrica\n" \
-               "            <operando> <operação> <operando>\n"
+               "            <número> <+|-|/|*> <número>\n"
 
     def out_error(self):
         """Método que retornará a saida do erro"""
