@@ -98,11 +98,11 @@ def check_ROS_master_port():
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
-    parser.add_argument("subnet",
-                        help="subnet to scan for port",
-                        type=str)
+    #parser.add_argument("subnet",
+    #                    help="subnet to scan for port",
+    #                    type=str)
     parser.add_argument("port",
                         help="port number to scan in your local network",
                         type=int)
     args = parser.parse_args()
-    print(check_subnet_for_open_port(args.subnet, args.port))
+print(check_own_subnet_for_open_port(args.port))
