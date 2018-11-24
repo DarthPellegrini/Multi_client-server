@@ -11,6 +11,11 @@ except:
     print("Este programa requer Python 3.x e a biblioteca Python-Tk")
     exit(0)
 
+def threaded(function):
+    def wrapper(*args, **kwargs):
+        threading.Thread(target=function, args=args, kwargs=kwargs).start()
+    return wrapper
+
 class Application():
     '''Classe principal'''
 
@@ -23,6 +28,7 @@ class Application():
     def start(self):
         '''Inicia a aplicação'''
         self.root.mainloop()
+        self.sock.close()
 
     def initComponents(self):
         '''Inicializa os componentes da aplicação'''
@@ -39,16 +45,59 @@ class Application():
         scroll.grid(row=0,column=3,sticky=N+S)
         self.text['yscrollcommand'] = scroll.set
         self.text.configure(state=DISABLED)
+        self.client_list = []
 
+    @threaded
     def initServer(self):
+        '''inicializa o servidor, aceita as conexões e salva dois parâmetros, conn (que guardará quem é o cliente) e addr (que guardará o endereço do cliente)'''
         self.writeMsg("Servidor","Inicizalizando o servidor...")
         self.sock = socket.socket()
-        hostname = socket.gethostname()
-        server_address = (self.get_ip(), 8899)
-        self.sock.bind(server_address)
+        self.sock.bind((self.get_ip(), 8899))
         self.writeMsg("Servidor", "Servidor Inicializado no endereço: " + str(self.get_ip()))
         self.sock.listen()
+        print("começou")
+        while True:
+            conn, addr = self.sock.accept()
+            #adiciona o cliente na lista de clientes ativos
+            self.client_list.append(conn)
+            self.updateClientList()
+            print (addr[0] + " connected")
+            self.writeMsg("Console",str(conn) + " se conectou.")
+            # cria uma thread individual para cada cliente
+            print("criou a thread")
+            self.clientThread(conn,addr)
+
+    @threaded
+    def clientThread(self, conn, addr):
+        '''Cuidará do serviço de mensagens de cada cliente '''
+        conn.send("Bem vindo ao servidor!".encode())
+        while True:
+            try:
+                message = conn.recv(4096).decode()
+                print("recebeu")
+                if message:
+                    print("enviou")
+                    self.sock.send(str(input(message)).encode())
+                else:
+                    print("desconectou")
+                    self.remove(conn)
+            except:
+                continue
+                
+    def remove(self, conn):
+        '''Irá remover o cliente que se desconectou da lista de clientes ativos'''
+        if conn in self.client_list:
+            self.client_list.remove(conn)
+            self.updateClientList()
         
+    def updateClientList(self):
+        '''Atualiza a lista de clientes conectados'''
+        print("atualizou")
+        self.status.delete(0, 'end')
+        self.status.insert('end',"### Clientes Conectados ###\n")
+        for client in self.client_list:
+            self.status.insert('end',str(client.getpeername()))
+
     def writeMsg(self,info,message):
         self.text.configure(state=NORMAL)
         self.text.insert('end', "["+info+"]("+str(datetime.datetime.now().hour)+":"+str(datetime.datetime.now().minute)+":"+str(datetime.datetime.now().second)+"): "+message+"\n")
@@ -59,7 +108,6 @@ class Application():
         self.status.insert(pos, "["+info+"]"+message+"\n")
         self.status.configure(state=DISABLED)
 
-<<<<<<< HEAD
     def get_ip(self):
         '''Metodo que retorna o endereço IP do servidor '''
         s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
@@ -73,8 +121,6 @@ class Application():
             s.close()
         return IP
 
-=======
->>>>>>> c39cb05acefd1c8e64f4471291af999e50cbb4d2
     def input(self,message):
         """Metodo usado para tratar uma instrução comando
             Retorna o que será exibido no servidor"""
@@ -82,27 +128,27 @@ class Application():
         #agora pegamos o comando e salvamos numa variavel
         instruction = message.split(" ")[0]
         if instruction == "/server":
-            return out_server()
+            return self.out_server()
         elif instruction == "/data":
-            return out_data()
+            return self.out_data()
         elif instruction == "/ip":
-            return out_ip()
+            return self.out_ip()
         elif instruction == "/mac":
-            return out_mac()
+            return self.out_mac()
         elif instruction == "/sys":
-            return out_sys()
+            return self.out_sys()
         elif instruction == "/dev":
-            return out_dev()
+            return self.out_dev()
         elif instruction == "/info":
-            return out_info()
+            return self.out_info()
         elif instruction == "/dolar":
-            return out_dolar()
+            return self.out_dolar()
         elif instruction == "/calc":
-            return out_calc(message)
+            return self.out_calc(message)
         elif instruction == "/help":
-            return out_help()
+            return self.out_help()
         else:
-            return out_error()
+            return self.out_error()
 
     def out_server(self):
         """Método que retornará a saida do comando /server"""
@@ -153,7 +199,7 @@ class Application():
         # definiremos o que são os números aceitos (caracteres)
         is_a_number = ["0","1","2","3","4","5","6","7","8","9",",","."]
         # definiremos as operações conhecidas
-        is_a_operator = ["+","-","/","*"]
+        is_a_operator = ["+","-","/","*","^"]
         # retiramos todos os espaços da string se houverem
         string.strip(' ')
         # começaremos agora a lógica de busca dos operandos
@@ -188,7 +234,8 @@ class Application():
             return op1 / op2
         elif operator == "*":
             return op1 * op2
-
+        elif operator == "^":
+            return op1 ** op2
 
     def out_help(self):
         return "/server     Retorna o nome do servidor\n" \
@@ -200,11 +247,12 @@ class Application():
                "/info       Retorna mensagens gerais do sistema\n" \
                "/dolar      Retorna a cotação do dólar\n" \
                "/calc       Retorna o resultado de uma operação algébrica\n" \
-               "            <número> <+|-|/|*> <número>\n"
+               "            <número> <operação( + - / * ^ )> <número>\n"
 
     def out_error(self):
         """Método que retornará a saida do erro"""
         return "Erro - Comando não encontrado"
+
 
 #inicialização do programa
 if __name__ == '__main__':

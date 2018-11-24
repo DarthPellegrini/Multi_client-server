@@ -11,6 +11,11 @@ except:
     print("Este programa requer Python 3.x e a biblioteca Python-Tk")
     exit(0)
 
+def threaded(function):
+    def wrapper(*args, **kwargs):
+        threading.Thread(target=function, args=args, kwargs=kwargs).start()
+    return wrapper
+
 class Application():
     '''Classe principal'''
 
@@ -19,10 +24,13 @@ class Application():
         self.root = root
         self.initComponents()
         self.startConnection()
+        self.connectToServer()
         
     def start(self):
-        '''Inicia a aplicação'''     
+        '''Inicia a aplicação'''
         self.root.mainloop()
+        self.sock.close()
+        exit(0)
 
     def initComponents(self):
         '''Inicializa os componentes da aplicação'''
@@ -30,35 +38,50 @@ class Application():
         self.text.grid(row=0, column=0)
         self.input = Entry(self.root, width=95)
         self.input.grid(row=1,column=0,sticky=N+S+W)
-        self.button = Button(self.root, width=3, height=1,text="enviar")
+        self.button = Button(self.root, width=3, height=1, text="enviar")
         self.button.grid(row=1,column=0,columnspan=2,sticky=E)
         scroll = Scrollbar(self.root, command=self.text.yview)
         scroll.grid(row=0,column=1,sticky=N+S)
         self.text['yscrollcommand'] = scroll.set
         self.text.configure(state=DISABLED)
+        self.writeMsg("Console","Configurando a conexão do cliente...")
 
     def startConnection(self):
-        self.writeMsg("Cliente","Configurando a conexão do cliente...")
+        print("iniciou")
         self.sock = socket.socket()
         hostname = socket.gethostname()
         client_address = (hostname, 8899)
         self.sock.bind(client_address)
-        self.connectToServer()
 
+    @threaded
     def connectToServer(self):
-        self.writeMsg("Cliente","Buscando conexão com o servidor...")
+        '''Testa a conexão com o servidor '''
+        self.writeMsg("Console","Buscando conexão com o servidor...")
         server_address = self.findServer()
         if server_address is not "Erro":
             self.sock.connect((server_address,8899))
             print("deu certo porra")
-            self.writeMsg("Cliente","Conectado no servidor: " + server_address)
+            self.writeMsg("Console", "Conectado no servidor: " + server_address)
+            self.writeMsg("Console", "Para enviar mensagens, digite o caractere ' / ', a mensagem e pressione enviar")
+            self.writeMsg("Console", "Para exibir a lista dos comandos, digite /help")
+            self.button.bind("<Button-1>",self.get_input)
+            self.service
         else:
-            #avisa falha na busca e tenta novamente
-            self.writeMsg("Cliente","Erro - Nenhum servidor encontrado.")
-            self.writeMsg("Cliente","Esperando timeout para tentar novamente...")
+            #informa o erro na busca e tenta novamente
+            self.writeMsg("Console","Erro - Nenhum servidor encontrado.")
+            self.writeMsg("Console","Esperando timeout para tentar novamente...")
             print("deu merda")
             time.sleep(5.0)
-            connectToServer()
+            self.connectToServer()
+
+    def service(self):
+        '''Realiza o recebimento de mensagens'''
+        while True:
+            try:     
+                message = self.sock.recv(2048).decode()
+                self.writeMsg("Servidor",message)
+            except:
+                continue
 
     def writeMsg(self,info,message):
         self.text.configure(state=NORMAL)
@@ -95,7 +118,7 @@ class Application():
             processes.append(p)
             p.start()
         # Dá um tempo para processar
-        time.sleep(3.0)
+        time.sleep(1.0)
 
         for idx, p in enumerate(processes):
             # Se não terminou no tempo necessário, termina o processo
@@ -114,15 +137,21 @@ class Application():
         try:
             s.connect((address, 8899))
             queue.put((True, address))
-        except socket.error as e:
+        except socket.error:
             queue.put((False, address))
     
-    def get_input(self):
+    def get_input(self,event):
         ''' Pega o conteúdo do que foi digitado e o envia para o servidor '''
-        pass
+        try:
+            input = self.input.get()
+            self.writeMsg("Cliente",input)
+            self.input.delete(0, 'end')
+            self.sock.send(input.encode())
+        except:
+            self.writeMsg("Console", "Erro - Servidor desconectado.")
+            self.button.configure(state=DISABLED)
+            self.sock.close()
 
-
-        
 #inicialização do programa
 if __name__ == '__main__':
     root = Tk()
