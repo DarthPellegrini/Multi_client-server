@@ -29,8 +29,8 @@ class Application():
     def start(self):
         '''Inicia a aplicação'''
         self.root.mainloop()
-        self.sock.close()
-        exit(0)
+        self.sock.shutdown(1)
+        exit(1)
 
     def initComponents(self):
         '''Inicializa os componentes da aplicação'''
@@ -49,8 +49,10 @@ class Application():
     def startConnection(self):
         print("iniciou")
         self.sock = socket.socket()
-        hostname = socket.gethostname()
-        client_address = (hostname, 8899)
+        # para uso na mesma máquina
+        client_address = (socket.gethostname(), 8899)
+        #para uso em máquinas diferentes
+        #client_address = (self.get_ip(), 8899)
         self.sock.bind(client_address)
 
     @threaded
@@ -81,7 +83,7 @@ class Application():
                 message = self.sock.recv(2048).decode()
                 self.writeMsg("Servidor",message)
             except:
-                continue
+                pass
 
     def writeMsg(self,info,message):
         self.text.configure(state=NORMAL)
@@ -120,7 +122,7 @@ class Application():
         # Dá um tempo para processar
         time.sleep(1.0)
 
-        for idx, p in enumerate(processes):
+        for idx,p in enumerate(processes):
             # Se não terminou no tempo necessário, termina o processo
             if p.exitcode is None:
                 p.terminate()
