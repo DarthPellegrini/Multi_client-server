@@ -28,16 +28,19 @@ def clientThread(conn, addr):
     #TODO modificar isso
     conn.send("Welcome to this chatroom!".encode())
     while True:
-            try:     
+            try:
                 message = conn.recv(2048).decode()    
                 if message:
                     #TODO modificar essa bosta
                     print ("<" + addr[0] + "> " + message)
                     conn.send(input(message).encode())
+                    #conn.send("ok".encode())
+                    print("aqui")
                 else:
+                    print("e agora aqui")
                     remove(conn)
             except:
-                continue
+                pass
 
 def remove(conn):
     '''Remove a conexão do cliente da lista de conexões '''
@@ -65,27 +68,27 @@ def input(message):
     #agora pegamos o comando e salvamos numa variavel
     instruction = message.split(" ")[0]
     if instruction == "/server":
-        return  out_server()
+        return out_server()
     elif instruction == "/data":
-        return  out_data()
+        return out_data()
     elif instruction == "/ip":
-        return  out_ip()
+        return out_ip()
     elif instruction == "/mac":
-        return  out_mac()
+        return out_mac()
     elif instruction == "/sys":
-        return  out_sys()
+        return out_sys()
     elif instruction == "/dev":
-        return  out_dev()
+        return out_dev()
     elif instruction == "/info":
-        return  out_info()
+        return out_info()
     elif instruction == "/dolar":
-        return  out_dolar()
+        return out_dolar()
     elif instruction == "/calc":
-        return  out_calc(message)
+        return out_calc(message)
     elif instruction == "/help":
-        return  out_help()
+        return out_help()
     else:
-        return  out_error()
+        return out_error()
 
 def out_server():
     """Método que retornará a saida do comando /server"""
@@ -200,4 +203,5 @@ if __name__ == '__main__':
     client_list = []
     server.listen()
     startService()
+    print("acabou")
     server.close()

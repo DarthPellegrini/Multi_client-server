@@ -67,7 +67,7 @@ class Application():
             self.writeMsg("Console", "Para enviar mensagens, digite o caractere ' / ', a mensagem e pressione enviar")
             self.writeMsg("Console", "Para exibir a lista dos comandos, digite /help")
             self.button.bind("<Button-1>",self.get_input)
-            self.service
+            self.service()
         else:
             #informa o erro na busca e tenta novamente
             self.writeMsg("Console","Erro - Nenhum servidor encontrado.")
@@ -79,8 +79,11 @@ class Application():
     def service(self):
         '''Realiza o recebimento de mensagens'''
         while True:
-            try:     
+            try:
+                print("ta aqui")
                 message = self.sock.recv(2048).decode()
+                print("e aqui")
+                print(message)
                 self.writeMsg("Servidor",message)
             except:
                 pass
