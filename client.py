@@ -54,10 +54,12 @@ class Application():
     def startConnection(self):
         self.writeMsg("Console", "Configurando a conexão do cliente...")
         self.sock = socket.socket()
-        # para uso na mesma máquina
-        client_address = (socket.gethostbyname(socket.gethostname()), 8899)
-        #para uso em máquinas diferentes
-        #client_address = (self.get_ip(), 8899)
+        try:
+            # para uso em máquinas diferentes
+            client_address = (self.get_ip(), 8899)
+        except:
+            # para uso na mesma máquina
+            client_address = (socket.gethostbyname(socket.gethostname()), 8899)
         self.sock.bind(client_address)
 
     @threaded

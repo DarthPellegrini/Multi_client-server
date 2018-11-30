@@ -1,5 +1,7 @@
 try:
+    import time
     import json
+    import urllib.request
     import socket
     import getmac
     import requests
@@ -90,12 +92,14 @@ def get_input(message):
         return out_dev()
     elif instruction == "/info":
         return out_info()
-    elif instruction == "/dolar":
-        return out_dolar()
+    elif instruction == "/bitcoin":
+        return out_bitcoin()
     elif instruction == "/calc":
         return out_calc(message)
     elif instruction == "/help":
         return out_help()
+    elif instruction == "/omaeWaMouShindeiru":
+        return "NANI????"
     else:
         return out_error()
 
@@ -127,19 +131,11 @@ def out_dev():
 
 def out_info():
     """Funcão que retornará a saida o do comando /info"""
-    return  "Informações sobre o sistema" \
-            "Servidor rodando no endereço: "+get_ip()+"\n" \
-            "TODO" \
-            "TODO" \
-
-def out_dolar():
-    """Método que retornará a saida do comando /dolar"""
-    # mandando uma requisição em  get para a api
-    rqs = requests.get('http://api.promasters.net.br/cotacao/v1/valores')
-    # pegando a requisição no formato json e jogando o texto na variavel valoratual
-    valoratual = json.loads(rqs.text)
-    # pega o retorno json busca a chave valores para pegar o preço do dolar
-    return valoratual['valores']['USD']['valor']
+    return  "Informações sobre o sistema\n" \
+            "Hora atual "+str(datetime.datetime.now())+"\n" \
+            "Servidor rodando no endereço- "+get_ip()+"\n" \
+            "Servidor com MAC- "+getmac.get_mac_address()+"\n" \
+            "Servidor utilizando o SO- "+platform()+"\n" 
 
 def out_calc(string):
     """Método que retornará a saida do comando /calc"""
@@ -198,9 +194,19 @@ def out_help():
             "/sys        Retorna a descrição do sistema operacional do servidor\n" \
             "/dev        Retorna o nome dos desenvolvedores\n" \
             "/info       Retorna mensagens gerais do sistema\n" \
-            "/dolar      Retorna a cotação do dólar\n" \
+            "/bitcoin    Retorna a cotação de uma bitcoin em dólares\n" \
             "/calc       Retorna o resultado de uma operação algébrica\n" \
             "            <número> <operação( + - / * ^ )> <número>\n"
+
+def out_bitcoin():
+    try:
+        url = "http://api.coindesk.com/v1/bpi/currentprice.json"
+        with urllib.request.urlopen(url) as url:
+            data = json.loads(url.read().decode('utf-8'))
+            valor = float(data['bpi']['USD']['rate'].replace(",", ""))
+            return "1 Bitcoin equivale a "+str(valor)+" dólares!"
+    except urllib.error.HTTPError:
+        print('URL inexistente!')
 
 def out_error():
     """Método que retornará a saida do erro"""
