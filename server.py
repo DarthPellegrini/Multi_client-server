@@ -4,12 +4,21 @@ try:
     import threading
     import requests
     import json
+    import multiprocessing
+    from platform import platform
     from tkinter import *
     from tkinter import ttk
     from tkinter import messagebox
 except:
     print("Este programa requer Python 3.x e a biblioteca Python-Tk")
     exit(0)
+
+def waitInput(server,t1):
+    while True:
+        if input("Comando: ") == "sair":
+            server.close()
+            t1.terminate()
+            exit(0)
 
 def startService():
     while True:
@@ -18,7 +27,7 @@ def startService():
         
         #adiciona a conexão na lista de clientes
         client_list.append(conn)
-        print (addr[0] + " se conectou")
+        #print (addr[0] + " se conectou")
         
         #Cria uma thread individual para cada cliente
         threading.Thread(target=clientThread, args=(conn, addr)).start()
@@ -26,21 +35,20 @@ def startService():
 
 def clientThread(conn, addr):
     #TODO modificar isso
-    conn.send("Welcome to this chatroom!".encode())
+    conn.send("Bem vindo ao servidor!".encode())
     while True:
-            try:
-                message = conn.recv(2048).decode()    
-                if message:
-                    #TODO modificar essa bosta
-                    print ("<" + addr[0] + "> " + message)
-                    conn.send(input(message).encode())
-                    #conn.send("ok".encode())
-                    print("aqui")
-                else:
-                    print("e agora aqui")
-                    remove(conn)
-            except:
-                pass
+        try:
+            message = conn.recv(2048).decode()    
+            if message:
+                #print ("<" + addr[0] + "> " + message)
+                conn.send(str(get_input(message)).encode())
+                #print("aqui")
+            else:
+                #print("e agora aqui")
+                remove(conn)
+                return
+        except:
+            pass
 
 def remove(conn):
     '''Remove a conexão do cliente da lista de conexões '''
@@ -61,7 +69,7 @@ def get_ip():
         s.close()
     return IP
 
-def input(message):
+def get_input(message):
     """Metodo usado para tratar uma instrução comando
         Retorna o que será exibido no servidor"""
 
@@ -92,15 +100,15 @@ def input(message):
 
 def out_server():
     """Método que retornará a saida do comando /server"""
-    pass
+    return  socket.gethostname()
 
 def out_data():
     """Método que retornará a saida do comando /data"""
-    pass
+    return datetime.datetime.now()
 
 def out_ip():
     """Funcão que retornará a saida o do comando /ip"""
-    pass
+    return get_ip()
 
 def out_mac():
     """Método que retornará a saida do comando /mac"""
@@ -108,17 +116,20 @@ def out_mac():
 
 def out_sys():
     """Método que retornará a saida do comando /sys"""
-    pass
+    return platform()
 
 def out_dev():
     """Método que retornará a saida do comando /dev"""
-    return 'Desenvolvido por:\nÊndril "Awak3n" Castilho' \
-            '\nFernando "Alemão de Troia" Kudrna,' \
-            '\nLeonardo "Darth" Pellegrini'
+    return 'Desenvolvido por:\n### Êndril "Awak3n" Castilho' \
+            '\n### Fernando "Alemão de Troia" Kudrna,' \
+            '\n### Leonardo "Darth" Pellegrini'
 
 def out_info():
     """Funcão que retornará a saida o do comando /info"""
-    pass
+    return  "Informações sobre o sistema" \
+            "Servidor rodando no endereço: "+get_ip()+"\n" \
+            "TODO" \
+            "TODO" \
 
 def out_dolar():
     """Método que retornará a saida do comando /dolar"""
@@ -178,7 +189,8 @@ def out_calc(string):
         return op1 ** op2
 
 def out_help():
-    return "/server     Retorna o nome do servidor\n" \
+    return "Informação sobre os comandos disponíveis: \n" \
+            "/server     Retorna o nome do servidor\n" \
             "/data       Reotrna a data do sistema do servidor\n" \
             "/ip         Retorna o endereço IP do servidor\n" \
             "/mac        Retorna o endereço MAC do servidor\n" \
@@ -196,12 +208,21 @@ def out_error():
 #inicialização do programa
 if __name__ == '__main__':
     #inicializa o servidor
-    #TODO print bonitinho
     server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     server.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
     server.bind((get_ip(), 8899))
     client_list = []
     server.listen()
-    startService()
-    print("acabou")
-    server.close()
+    print("##################################")
+    print("####                          ####")
+    print("####  Servidor inicializado!  ####")
+    print("####                          ####")
+    print("#### Para finalizar o serviço ####")
+    print("####      escreva 'sair'      ####")
+    print("####                          ####")
+    print("##################################")
+    t1 = multiprocessing.Process(target=startService)
+    t1.start()
+    threading.Thread(target=waitInput,args=(server,t1,)).start()
+
+    

@@ -26,11 +26,12 @@ class Application():
         self.startConnection()
         self.connectToServer()
         
+        
     def start(self):
         '''Inicia a aplicação'''
         self.root.mainloop()
-        self.sock.shutdown(1)
-        exit(1)
+        self.sock.close()
+        exit(0)
 
     def initComponents(self):
         '''Inicializa os componentes da aplicação'''
@@ -44,13 +45,16 @@ class Application():
         scroll.grid(row=0,column=1,sticky=N+S)
         self.text['yscrollcommand'] = scroll.set
         self.text.configure(state=DISABLED)
-        self.writeMsg("Console","Configurando a conexão do cliente...")
+        self.input.bind("<Return>",self.get_input)
+        self.input.configure(state=DISABLED)  
+        self.button.configure(state=DISABLED)
+
 
     def startConnection(self):
-        print("iniciou")
+        self.writeMsg("Console", "Configurando a conexão do cliente...")
         self.sock = socket.socket()
         # para uso na mesma máquina
-        client_address = (socket.gethostname(), 8899)
+        client_address = (socket.gethostbyname(socket.gethostname()), 8899)
         #para uso em máquinas diferentes
         #client_address = (self.get_ip(), 8899)
         self.sock.bind(client_address)
@@ -66,31 +70,37 @@ class Application():
             self.writeMsg("Console", "Conectado no servidor: " + server_address)
             self.writeMsg("Console", "Para enviar mensagens, digite o caractere ' / ', a mensagem e pressione enviar")
             self.writeMsg("Console", "Para exibir a lista dos comandos, digite /help")
-            self.button.bind("<Button-1>",self.get_input)
+            self.button.bind("<Button-1>", self.get_input)
+            self.input.configure(state=NORMAL)  
+            self.button.configure(state=NORMAL)
             self.service()
+            exit(0)
         else:
             #informa o erro na busca e tenta novamente
             self.writeMsg("Console","Erro - Nenhum servidor encontrado.")
             self.writeMsg("Console","Esperando timeout para tentar novamente...")
-            print("deu merda")
-            time.sleep(5.0)
+            time.sleep(3.0)
             self.connectToServer()
 
     def service(self):
         '''Realiza o recebimento de mensagens'''
         while True:
             try:
-                print("ta aqui")
                 message = self.sock.recv(2048).decode()
-                print("e aqui")
-                print(message)
+                if message == "":
+                    self.writeMsg("Console","O servidor foi desconectado.")
+                    self.input.configure(state=DISABLED)  
+                    self.button.configure(state=DISABLED)
+                    return
+                print("messsage: "+message)
                 self.writeMsg("Servidor",message)
             except:
-                pass
+                return
 
     def writeMsg(self,info,message):
         self.text.configure(state=NORMAL)
         self.text.insert('end', "["+info+"]("+str(datetime.datetime.now().hour)+":"+str(datetime.datetime.now().minute)+":"+str(datetime.datetime.now().second)+"): "+message+"\n")
+        self.text.see('end')
         self.text.configure(state=DISABLED)
 
     def get_ip(self):
@@ -156,6 +166,7 @@ class Application():
             self.writeMsg("Console", "Erro - Servidor desconectado.")
             self.button.configure(state=DISABLED)
             self.sock.close()
+            exit(0)
 
 #inicialização do programa
 if __name__ == '__main__':
