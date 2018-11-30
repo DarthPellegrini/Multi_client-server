@@ -25,7 +25,7 @@ class Application():
         self.initComponents()
         self.startConnection()
         self.connectToServer()
-        
+        print("e aqui")
         
     def start(self):
         '''Inicia a aplicação'''
@@ -44,9 +44,10 @@ class Application():
         scroll = Scrollbar(self.root, command=self.text.yview)
         scroll.grid(row=0,column=1,sticky=N+S)
         self.text['yscrollcommand'] = scroll.set
+        self.input.bind("<Return>", self.get_input)
+        self.button.bind("<Button-1>", self.get_input)
         self.text.configure(state=DISABLED)
-        self.input.bind("<Return>",self.get_input)
-        self.input.configure(state=DISABLED)  
+        self.input.configure(state=DISABLED)
         self.button.configure(state=DISABLED)
 
 
@@ -66,14 +67,13 @@ class Application():
         server_address = self.findServer()
         if server_address is not "Erro":
             self.sock.connect((server_address,8899))
-            print("deu certo porra")
             self.writeMsg("Console", "Conectado no servidor: " + server_address)
             self.writeMsg("Console", "Para enviar mensagens, digite o caractere ' / ', a mensagem e pressione enviar")
             self.writeMsg("Console", "Para exibir a lista dos comandos, digite /help")
-            self.button.bind("<Button-1>", self.get_input)
             self.input.configure(state=NORMAL)  
             self.button.configure(state=NORMAL)
             self.service()
+            print("aqui")
             exit(0)
         else:
             #informa o erro na busca e tenta novamente
@@ -173,3 +173,4 @@ if __name__ == '__main__':
     root = Tk()
     app = Application(root)
     app.start()
+    print("saiu")

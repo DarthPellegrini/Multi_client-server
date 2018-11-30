@@ -1,16 +1,17 @@
 try:
+    import json
     import socket
+    import getmac
+    import requests
     import datetime
     import threading
-    import requests
-    import json
     import multiprocessing
     from platform import platform
     from tkinter import *
     from tkinter import ttk
     from tkinter import messagebox
 except:
-    print("Este programa requer Python 3.x e a biblioteca Python-Tk")
+    print("Este programa requer Python 3.x e as bibliotecas Python-Tk e getmac")
     exit(0)
 
 def waitInput(server,t1):
@@ -34,8 +35,8 @@ def startService():
     conn.close()
 
 def clientThread(conn, addr):
-    #TODO modificar isso
-    conn.send("Bem vindo ao servidor!".encode())
+    '''Thread que controla o fluxo de mensagens do cliente'''
+    #conn.send("Bem vindo ao servidor!".encode())
     while True:
         try:
             message = conn.recv(2048).decode()    
@@ -100,23 +101,23 @@ def get_input(message):
 
 def out_server():
     """Método que retornará a saida do comando /server"""
-    return  socket.gethostname()
+    return "Nome- "+socket.gethostname()
 
 def out_data():
     """Método que retornará a saida do comando /data"""
-    return datetime.datetime.now()
+    return "Data e hora- "+str(datetime.datetime.now())
 
 def out_ip():
     """Funcão que retornará a saida o do comando /ip"""
-    return get_ip()
+    return "IP- "+get_ip()
 
 def out_mac():
     """Método que retornará a saida do comando /mac"""
-    pass
+    return "MAC- "+getmac.get_mac_address()
 
 def out_sys():
     """Método que retornará a saida do comando /sys"""
-    return platform()
+    return "Sistema Operacional- "+platform()
 
 def out_dev():
     """Método que retornará a saida do comando /dev"""
