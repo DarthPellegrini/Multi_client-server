@@ -24,36 +24,43 @@ def waitInput(server,t1):
             exit(0)
 
 def startService():
+    '''Contém o loop da thread principal do servidor
+       que cuidará de receber e configurar as conexões dos clientes'''
+    client_list = []
     while True:
         #aceita a conexão de qualquer cliente
         conn, addr = server.accept()
         
-        #adiciona a conexão na lista de clientes
+        #adiciona a conexão na lista de clientes se ele já não está incluso
+        #if conn not in client_list:
         client_list.append(conn)
-        #print (addr[0] + " se conectou")
-        
+            
         #Cria uma thread individual para cada cliente
-        threading.Thread(target=clientThread, args=(conn, addr)).start()
+        threading.Thread(target=clientThread, args=(conn, addr, client_list)).start()
     conn.close()
 
-def clientThread(conn, addr):
+def clientThread(conn, addr, client_list):
     '''Thread que controla o fluxo de mensagens do cliente'''
-    #conn.send("Bem vindo ao servidor!".encode())
     while True:
         try:
-            message = conn.recv(2048).decode()    
+            # recebe a mensagem do cliente
+            message = conn.recv(2048).decode()
             if message:
-                #print ("<" + addr[0] + "> " + message)
-                conn.send(str(get_input(message)).encode())
-                #print("aqui")
+                response = str(get_input(message))
+                if response == "exit":
+                   remove(conn,client_list)
+                print("chegou")
+                print(client_list)
+                # e responde baseado nos comandos existentes
+                conn.send(response.encode())
             else:
-                #print("e agora aqui")
-                remove(conn)
+                #caso não receba, remove o cliente da lista de clientes
+                remove(conn,client_list)
                 return
         except:
             pass
 
-def remove(conn):
+def remove(conn,client_list):
     '''Remove a conexão do cliente da lista de conexões '''
     if conn in client_list:
         client_list.remove(conn)
@@ -63,10 +70,13 @@ def get_ip():
     '''Metodo que retorna o endereço IP do servidor '''
     s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     try:
-        # não precisa ser alcançável
+        # não precisa ser um endereço alcançável
+        # pois iremos apenas pegar o endereço IP
+        # que este socket utilizou na interface de rede
         s.connect(('8.8.8.8', 1))
         IP = s.getsockname()[0]
     except:
+        #caso não haja conexão, utilizará o localhost
         IP = '127.0.0.1'
     finally:
         s.close()
@@ -76,7 +86,7 @@ def get_input(message):
     """Metodo usado para tratar uma instrução comando
         Retorna o que será exibido no servidor"""
 
-    #agora pegamos o comando e salvamos numa variavel
+    #o método identifica o comando e executa a operação correspondente
     instruction = message.split(" ")[0]
     if instruction == "/server":
         return out_server()
@@ -100,28 +110,37 @@ def get_input(message):
         return out_help()
     elif instruction == "/omaeWaMouShindeiru":
         return "NANI????"
+    elif instruction == "/quit":
+        return "exit"
     else:
-        return out_error()
+        return "Erro - Comando não encontrado"
 
 def out_server():
     """Método que retornará a saida do comando /server"""
-    return "Nome- "+socket.gethostname()
+    return "Nome: "+socket.gethostname()
 
 def out_data():
     """Método que retornará a saida do comando /data"""
-    return "Data e hora- "+str(datetime.datetime.now())
+    month_database = {1:"Janeiro",2:"Fevereiro",3:"Março",4:"Abril",5:"Maio",6:"Junho",7:"Julho",8:"Agosto",9:"Setembro",10:"Outubro",11:"Novembro",12:"Dezembro"}
+    date = "Hoje é dia " + str(datetime.datetime.now().day) + " de " + month_database[datetime.datetime.now().month] + " de " + str(datetime.datetime.now().year)
+    while (len(date) < 33):
+        if len(date) % 2 == 0:
+            date += " "
+        else:
+            date = " " + date
+    return date
 
 def out_ip():
     """Funcão que retornará a saida o do comando /ip"""
-    return "IP- "+get_ip()
+    return "IP: "+get_ip()
 
 def out_mac():
     """Método que retornará a saida do comando /mac"""
-    return "MAC- "+getmac.get_mac_address()
+    return "MAC: "+getmac.get_mac_address()
 
 def out_sys():
     """Método que retornará a saida do comando /sys"""
-    return "Sistema Operacional- "+platform()
+    return "Sistema Operacional: "+platform()
 
 def out_dev():
     """Método que retornará a saida do comando /dev"""
@@ -132,58 +151,46 @@ def out_dev():
 def out_info():
     """Funcão que retornará a saida o do comando /info"""
     return  "Informações sobre o sistema\n" \
-            "Hora atual "+str(datetime.datetime.now())+"\n" \
-            "Servidor rodando no endereço- "+get_ip()+"\n" \
-            "Servidor com MAC- "+getmac.get_mac_address()+"\n" \
-            "Servidor utilizando o SO- "+platform()+"\n" 
+            "############################################################\n" \
+            "####                                                    ####\n" \
+            "####                     " + show_message() + "                     ####\n" \
+            "####                                                    ####\n" \
+            "####          "+out_data()+"         ####\n" \
+            "####                                                    ####\n" \
+            "####"+show_ip("O servidor está rodando no endereço "+get_ip())+" ####\n" \
+            "####                                                    ####\n" \
+            "####                 Desenvolvido por:                  ####\n" \
+            "####              Êndril \"Awak3n\" Castilho              ####\n" \
+            "####         Fernando \"Alemão de Troia\" Kudrna          ####\n" \
+            "####            Leonardo \"Darth\" Pellegrini             ####\n" \
+            "####                                                    ####\n" \
+            "############################################################\n"
 
 def out_calc(string):
     """Método que retornará a saida do comando /calc"""
-    # primeiro vamos remover o /calc da string
-    string = string[5:]
-    # agora vamos remover todos os espaços em branco antes do primeiro operando se houverem
-    while string[0] == " ":
-        string = string[1:]
-    # definiremos o que são os números aceitos (caracteres)
-    is_a_number = ["0","1","2","3","4","5","6","7","8","9",",","."]
-    # definiremos as operações conhecidas
-    is_a_operator = ["+","-","/","*","^"]
-    # retiramos todos os espaços da string se houverem
-    string.strip(' ')
-    # começaremos agora a lógica de busca dos operandos
-    firstOp = True
-    op1 = ""
-    op2 = ""
-    operator = ""
-    for caractere in string:
-        if caractere in is_a_number:
-            if caractere == ",":
-                caractere = "."
-            if firstOp == True:
-                op1 += caractere
-            else:
-                op2 += caractere
-        elif caractere in is_a_operator:
-            operator = caractere
-            firstOp = False
-    # convertemos os operandos para
+    op = string.split(" ")
+    operator_list = ["+", "-", "/", "*", "^"]
     try:
-        op1 = float(op1)
-        op2 = float(op2)
+        # verifica se o operador é um operador válido
+        if op[2] in operator_list:
+            # realiza a operação baseada nos valores informados
+            if op[2] == "":
+                return "Erro - Operador não válido"
+            elif op[2] == "+":
+                return float(op[1]) + float(op[3])
+            elif op[2] == "-":
+                return float(op[1]) - float(op[3])
+            elif op[2] == "/":
+                return float(op[1]) / float(op[3])
+            elif op[2] == "*":
+                return float(op[1]) * float(op[3])
+            elif op[2] == "^":
+                return float(op[1]) ** float(op[3])
+        else:
+            # caso um dos operando não seja numérico, levanta uma exceção
+            raise Exception
     except:
         return "Erro - Um ou mais operandos são inválidos"
-    if operator == "":
-        return "Erro - Operador não encontrado"
-    elif operator == "+":
-        return op1 + op2
-    elif operator == "-":
-        return op1 - op2
-    elif operator == "/":
-        return op1 / op2
-    elif operator == "*":
-        return op1 * op2
-    elif operator == "^":
-        return op1 ** op2
 
 def out_help():
     return "Informação sobre os comandos disponíveis: \n" \
@@ -196,9 +203,11 @@ def out_help():
             "/info       Retorna mensagens gerais do sistema\n" \
             "/bitcoin    Retorna a cotação de uma bitcoin em dólares\n" \
             "/calc       Retorna o resultado de uma operação algébrica\n" \
-            "            <número> <operação( + - / * ^ )> <número>\n"
+            "            <número> <operação( + - / * ^ )> <número>\n" \
+            "/quit       Irá encerrar a conexão. "
 
 def out_bitcoin():
+    """Retorna a cotação atual do Bitcoin em dólares"""
     try:
         url = "http://api.coindesk.com/v1/bpi/currentprice.json"
         with urllib.request.urlopen(url) as url:
@@ -208,17 +217,32 @@ def out_bitcoin():
     except urllib.error.HTTPError:
         print('URL inexistente!')
 
-def out_error():
-    """Método que retornará a saida do erro"""
-    return "Erro - Comando não encontrado"
+def show_message():
+    """Retorna uma mensagem de saudação baseada no horário atual"""
+    time = float(datetime.datetime.now().hour)
+    second = float(datetime.datetime.now().second)
+    if (time >= 6 and second > 0) and time < 12:
+        return " Bom dia! "
+    elif (time >= 12 and second > 0) and time <= 19:
+        return "Boa tarde!"
+    else:
+        return "Boa noite!"
+
+def show_ip(ip):
+    """Centraliza a string do endereço IP """
+    while len(ip) < 51:
+        if len(ip) % 2 == 0:
+            ip += " "
+        else:
+            ip = " " + ip
+    return ip
 
 #inicialização do programa
 if __name__ == '__main__':
-    #inicializa o servidor
+    #inicializa o socket do servidor
     server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     server.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
     server.bind((get_ip(), 8899))
-    client_list = []
     server.listen()
     print("##################################")
     print("####                          ####")
@@ -228,6 +252,7 @@ if __name__ == '__main__':
     print("####      escreva 'sair'      ####")
     print("####                          ####")
     print("##################################")
+    #inicializa o serviço de rede e espera de comando de saída
     t1 = multiprocessing.Process(target=startService)
     t1.start()
     threading.Thread(target=waitInput,args=(server,t1,)).start()
