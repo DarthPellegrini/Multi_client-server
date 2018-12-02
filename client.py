@@ -118,9 +118,11 @@ class Application():
                     self.writeMsg("Console","O servidor foi desconectado.")
                     self.input.configure(state=DISABLED)  
                     self.button.configure(state=DISABLED)
+                    self.input.unbind_all
+                    self.button.unbind_all
                     return
                 # e a exibe na tela
-                self.writeMsg("Servidor",message)
+                self.writeMsg("SERVIDOR",message)
             except:
                 return
 
@@ -231,8 +233,6 @@ class Application():
                 raise Exception
         except:
             self.writeMsg("Console", "Erro - Número de servidor inválido.")
-
-    
 
 #inicialização do programa
 if __name__ == '__main__':

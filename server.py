@@ -1,5 +1,4 @@
 try:
-    import time
     import json
     import urllib.request
     import socket
@@ -9,11 +8,8 @@ try:
     import threading
     import multiprocessing
     from platform import platform
-    from tkinter import *
-    from tkinter import ttk
-    from tkinter import messagebox
 except:
-    print("Este programa requer Python 3.x e as bibliotecas Python-Tk e getmac")
+    print("Este programa requer Python 3.x e a biblioteca getmac")
     exit(0)
 
 def waitInput(server, t1):
@@ -32,8 +28,7 @@ def startService():
         #aceita a conexão de qualquer cliente
         conn, addr = server.accept()
         
-        #adiciona a conexão na lista de clientes se ele já não está incluso
-        #if conn not in client_list:
+        #adiciona a conexão na lista de clientes
         client_list.append(conn)
             
         #Cria uma thread individual para cada cliente
@@ -53,7 +48,7 @@ def clientThread(conn, addr, client_list):
                 if response == "exit":
                    remove(conn, client_list)
                    
-                # e responde baseado nos comandos existentes
+                # responde a mensagem baseado nos comandos existentes
                 conn.send(response.encode())
             else:
                 #caso não receba, remove o cliente da lista de clientes
@@ -87,7 +82,6 @@ def get_ip():
 def get_input(message):
     """Metodo usado para tratar uma instrução comando
         Retorna o que será exibido no servidor"""
-
     #o método identifica o comando e executa a operação correspondente
     instruction = message.split(" ")[0]
     if instruction == "/server":
@@ -110,8 +104,6 @@ def get_input(message):
         return out_calc(message)
     elif instruction == "/help":
         return out_help()
-    elif instruction == "/omaeWaMouShindeiru":
-        return "NANI????"
     elif instruction == "/quit":
         return "exit"
     else:
@@ -152,12 +144,15 @@ def out_dev():
 
 def out_info():
     """Funcão que retornará a saida o do comando /info"""
+    time = str(datetime.datetime.now().hour)+":"+str(datetime.datetime.now().minute)+":"+str(datetime.datetime.now().second)
     return  "Informações sobre o sistema\n" \
             "############################################################\n" \
             "####                                                    ####\n" \
             "####"+format_str(show_message()) + "####\n" \
             "####                                                    ####\n" \
             "####"+format_str(out_data())+"####\n" \
+            "####                                                    ####\n" \
+            "####"+format_str("Hora atual: " + time)+"####\n" \
             "####                                                    ####\n" \
             "####"+format_str("O servidor \'"+ socket.gethostname()+ "\' está funcionando")+"####\n" \
             "####" + format_str("no endereço \'" + get_ip() + "\'") + "####\n" \
@@ -167,7 +162,7 @@ def out_info():
             "####         Fernando \"Alemão de Troia\" Kudrna          ####\n" \
             "####            Leonardo \"Darth\" Pellegrini             ####\n" \
             "####                                                    ####\n" \
-            "############################################################\n"
+            "############################################################"
 
 def out_calc(string):
     """Método que retornará a saida do comando /calc"""
