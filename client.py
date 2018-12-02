@@ -11,6 +11,7 @@ except:
     print("Este programa requer Python 3.x e a biblioteca Python-Tk")
     exit(0)
 
+# para o funcionamento correto de multithreading dentro da classe
 def threaded(function):
     def wrapper(*args, **kwargs):
         threading.Thread(target=function, args=args, kwargs=kwargs).start()
@@ -83,7 +84,8 @@ class Application():
         if server_status is not "Erro":
             self.input.configure(state=NORMAL)  
             self.button.configure(state=NORMAL)
-            if server_status == '0':
+            # se só existir um servidor dispónivel, se conecta a ele
+            if server_status == '1':
                 self.sock.connect((self.addr_list[0],8899))
                 self.writeMsg("Console", "Conectado no servidor " + self.addr_name[0] )
                 self.writeMsg("Console", "Para enviar mensagens, digite o caractere ' / ', o comando e pressione enviar")
@@ -92,6 +94,7 @@ class Application():
                 self.button.bind("<Button-1>", self.get_input)
                 self.service()
             else:
+                # senão, exibe a lista de servidores disponíveis
                 self.input.bind("<Return>", self.get_server)
                 self.button.bind("<Button-1>", self.get_server)
                 self.writeMsg("Console", "Servidores disponíveis:")
@@ -108,17 +111,21 @@ class Application():
         '''Realiza o recebimento de mensagens'''
         while True:
             try:
+                # recebe a mensagem
                 message = self.sock.recv(2048).decode()
                 if message == "":
+                    #caso receba uma mensagem vazia, é porque o servidor foi desconectado
                     self.writeMsg("Console","O servidor foi desconectado.")
                     self.input.configure(state=DISABLED)  
                     self.button.configure(state=DISABLED)
                     return
+                # e a exibe na tela
                 self.writeMsg("Servidor",message)
             except:
                 return
 
     def writeMsg(self,info,message):
+        """Formata uma mensagem para ser exibida na interface gráfica do cliente"""
         self.text.configure(state=NORMAL)
         self.text.insert('end', "["+info+"]("+str(datetime.datetime.now().hour)+":"+str(datetime.datetime.now().minute)+":"+str(datetime.datetime.now().second)+"): "+message+"\n")
         self.text.see('end')
@@ -161,7 +168,7 @@ class Application():
         # dá um tempo para processar todas as conexões
         time.sleep(1.0)
 
-        # e procura uma conexão
+        # e procura uma conexão com o port aberto
         self.addr_list = []
         self.addr_name = []
         for idx,p in enumerate(processes):
@@ -169,7 +176,7 @@ class Application():
             if p.exitcode is None:
                 p.terminate()
             else:
-                # verificando se a conexão possui o port aberto
+                # se a conexão possui o port 8899 aberto, a adiciona a lista de servidores
                 open_ip, address, name = q.get()
                 if open_ip:
                     self.addr_list.append(address)
@@ -183,9 +190,10 @@ class Application():
         ''' Verifica a conexão para um determinado endereço IP '''
         s = socket.socket()
         try:
+            # irá testar a conexão e também receberá o nome do servidor
             s.connect((address, 8899))
             s.send("/server".encode())
-            queue.put((True, address, s.recv(2048).decode())[5:] )
+            queue.put((True, address, str(s.recv(2048).decode())[6:]))
         except socket.error:
             queue.put((False, address, "none"))
     
@@ -201,19 +209,26 @@ class Application():
             self.button.configure(state=DISABLED)
             self.sock.close()
     
+    @threaded
     def get_server(self, event):
         ''' Verifica se o servidor selecionado está disponível '''
         try:
             input = int(self.input.get())-1
             self.input.delete(0, 'end')
-            if input > 0 and input < len(self.addr_list):
-                self.sock.connect((self.addr_list[input],8899))
+            if input >= 0 and input < len(self.addr_list):
+                self.sock.connect((self.addr_list[input], 8899))
+                self.input.unbind_all
+                self.button.unbind_all
+                self.input.bind("<Return>", self.get_input)
+                self.button.bind("<Button-1>", self.get_input)
+                self.input.configure(state=NORMAL)  
+                self.button.configure(state=NORMAL)
                 self.writeMsg("Console", "Conectado no servidor " + self.addr_name[input] )
                 self.writeMsg("Console", "Para enviar mensagens, digite o caractere ' / ', o comando e pressione enviar")
                 self.writeMsg("Console", "Para exibir a lista dos comandos, digite /help")
+                self.service()
             else:
                 raise Exception
-            
         except:
             self.writeMsg("Console", "Erro - Número de servidor inválido.")
 

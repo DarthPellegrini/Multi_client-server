@@ -47,16 +47,17 @@ def clientThread(conn, addr, client_list):
             message = conn.recv(2048).decode()
             if message:
                 response = str(get_input(message))
+
+                # caso cliente se desconecte
                 if response == "exit":
-                   remove(conn,client_list)
-                print("chegou")
-                print(client_list)
+                   remove(conn, client_list)
+                   
                 # e responde baseado nos comandos existentes
                 conn.send(response.encode())
             else:
                 #caso não receba, remove o cliente da lista de clientes
                 remove(conn,client_list)
-                return
+                pass
         except:
             pass
 
@@ -153,11 +154,12 @@ def out_info():
     return  "Informações sobre o sistema\n" \
             "############################################################\n" \
             "####                                                    ####\n" \
-            "####                     " + show_message() + "                     ####\n" \
+            "####"+format_str(show_message()) + "####\n" \
             "####                                                    ####\n" \
-            "####          "+out_data()+"         ####\n" \
+            "####"+format_str(out_data())+"####\n" \
             "####                                                    ####\n" \
-            "####"+show_ip("O servidor está rodando no endereço "+get_ip())+" ####\n" \
+            "####"+format_str("O servidor \'"+ socket.gethostname()+ "\' está funcionando")+"####\n" \
+            "####" + format_str("no endereço \'" + get_ip() + "\'") + "####\n" \
             "####                                                    ####\n" \
             "####                 Desenvolvido por:                  ####\n" \
             "####              Êndril \"Awak3n\" Castilho              ####\n" \
@@ -228,14 +230,14 @@ def show_message():
     else:
         return "Boa noite!"
 
-def show_ip(ip):
-    """Centraliza a string do endereço IP """
-    while len(ip) < 51:
-        if len(ip) % 2 == 0:
-            ip += " "
+def format_str(str):
+    """Centraliza uma string do comando /info"""
+    while len(str) < 52:
+        if len(str) % 2 == 0:
+            str += " "
         else:
-            ip = " " + ip
-    return ip
+            str = " " + str
+    return str
 
 #inicialização do programa
 if __name__ == '__main__':
