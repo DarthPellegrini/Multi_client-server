@@ -16,7 +16,8 @@ except:
     print("Este programa requer Python 3.x e as bibliotecas Python-Tk e getmac")
     exit(0)
 
-def waitInput(server,t1):
+def waitInput(server, t1):
+    """Esperará o comando de saída"""
     while True:
         if input("Comando: ") == "sair":
             server.close()
