@@ -205,7 +205,13 @@ class Application():
             input = self.input.get()
             self.writeMsg("Cliente",input)
             self.input.delete(0, 'end')
-            self.sock.send(input.encode())
+            # A mensagem precisa conter o caractere ' / '
+            if '/' not in input.split(" ")[0]:
+                # caso não contenha, será ignorada pelo console
+                self.writeMsg("Console","Erro - Nenhum comando foi detectado")
+            else:
+                # somente se o caractere estiver presente a mensagem será enviada para o servidor
+                self.sock.send(input.encode())
         except:
             self.writeMsg("Console", "Erro - Servidor desconectado.")
             self.button.configure(state=DISABLED)
