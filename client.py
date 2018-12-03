@@ -23,7 +23,7 @@ class Application():
     def __init__(self, root):
         '''Construtor da classe, recebe a janela como parâmetro'''
         self.root = root
-        self.root.title("Aplicação do Cliente")
+        #self.root.title("Aplicação do Cliente")
         self.initComponents()
         self.startConnection()
         self.connectToServer()

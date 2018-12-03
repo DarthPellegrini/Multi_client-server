@@ -199,6 +199,7 @@ def out_help():
             "/sys        Retorna a descrição do sistema operacional do servidor\n" \
             "/dev        Retorna o nome dos desenvolvedores\n" \
             "/info       Retorna mensagens gerais do sistema\n" \
+            "/help       Retorna a lista de comandos\n" \
             "/bitcoin    Retorna a cotação de uma bitcoin em dólares\n" \
             "/calc       Retorna o resultado de uma operação algébrica\n" \
             "            <número> <operação( + - / * ^ )> <número>\n" \
