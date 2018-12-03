@@ -193,7 +193,7 @@ def out_calc(string):
 def out_help():
     return "Informação sobre os comandos disponíveis: \n" \
             "/server     Retorna o nome do servidor\n" \
-            "/data       Reotrna a data do sistema do servidor\n" \
+            "/data       Retorna a data do sistema do servidor\n" \
             "/ip         Retorna o endereço IP do servidor\n" \
             "/mac        Retorna o endereço MAC do servidor\n" \
             "/sys        Retorna a descrição do sistema operacional do servidor\n" \
