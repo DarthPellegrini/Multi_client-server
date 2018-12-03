@@ -9,7 +9,7 @@ try:
     import multiprocessing
     from platform import platform
 except:
-    print("Este programa requer Python 3.x e a biblioteca getmac")
+    print("Este programa requer Python 3.x e as bibliotecas getmac e requests")
     exit(0)
 
 def waitInput(server, t1):
@@ -147,21 +147,21 @@ def out_info():
     time = str(datetime.datetime.now().hour)+":"+str(datetime.datetime.now().minute)+":"+str(datetime.datetime.now().second)
     return  "Informações sobre o sistema\n" \
             "############################################################\n" \
-            "####                                                    ####\n" \
+            "####"+format_str("")+"####\n" \
             "####"+format_str(show_message()) + "####\n" \
-            "####                                                    ####\n" \
+            "####"+format_str("")+"####\n" \
             "####"+format_str(out_data())+"####\n" \
-            "####                                                    ####\n" \
+            "####"+format_str("")+"####\n" \
             "####"+format_str("Hora atual: " + time)+"####\n" \
-            "####                                                    ####\n" \
+            "####"+format_str("")+"####\n" \
             "####"+format_str("O servidor \'"+ socket.gethostname()+ "\' está funcionando")+"####\n" \
-            "####" + format_str("no endereço \'" + get_ip() + "\'") + "####\n" \
-            "####                                                    ####\n" \
-            "####                 Desenvolvido por:                  ####\n" \
-            "####              Êndril \"Awak3n\" Castilho              ####\n" \
-            "####         Fernando \"Alemão de Troia\" Kudrna          ####\n" \
-            "####            Leonardo \"Darth\" Pellegrini             ####\n" \
-            "####                                                    ####\n" \
+            "####"+format_str("no endereço \'" + get_ip() + "\'") + "####\n" \
+            "####"+format_str("")+"####\n" \
+            "####"+format_str("Desenvolvido por")+"####\n" \
+            "####"+format_str("Êndril \"Awak3n\" Castilho")+"####\n" \
+            "####"+format_str("Fernando \"Alemão de Troia\" Kudrna")+"####\n" \
+            "####"+format_str("Leonardo \"Darth\" Pellegrini")+"####\n" \
+            "####"+format_str("")+"####\n" \
             "############################################################"
 
 def out_calc(string):
