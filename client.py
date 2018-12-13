@@ -199,7 +199,7 @@ class Application():
         except socket.error:
             queue.put((False, address, "none"))
     
-    def get_input(self,event):
+    def get_input(self):
         ''' Pega o conteúdo do que foi digitado e o envia para o servidor '''
         try:
             input = self.input.get()
@@ -218,7 +218,7 @@ class Application():
             self.sock.close()
     
     @threaded
-    def get_server(self, event):
+    def get_server(self):
         ''' Verifica se o servidor selecionado está disponível '''
         try:
             input = int(self.input.get())-1
