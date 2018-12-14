@@ -92,12 +92,12 @@ class Application():
                 self.writeMsg("Console", "Para enviar mensagens, digite o caractere ' / ', o comando e pressione enviar")
                 self.writeMsg("Console", "Para exibir a lista dos comandos, digite /help")
                 self.input.bind("<Return>", self.get_input)
-                self.button.configure(command=self.get_input)
+                self.button.bind("<Button-1>",self.get_input)
                 self.service()
             else:
                 # senão, exibe a lista de servidores disponíveis
                 self.input.bind("<Return>", self.get_server)
-                self.button.configure("<Button-1>", self.get_server)
+                self.button.bind("<Button-1>",self.get_server)
                 self.writeMsg("Console", "Servidores disponíveis:")
                 for n in range(0,len(self.addr_list)):
                     self.writeMsg("Console",str(n+1) + " - " + self.addr_name[n])
@@ -119,6 +119,7 @@ class Application():
                     self.writeMsg("Console","O servidor foi desconectado.")
                     self.input.unbind('<Return>')
                     self.input.configure(state=DISABLED)  
+                    self.button.unbind('<Button-1>')
                     self.button.configure(state=DISABLED)
                     return
                 # e a exibe na tela
@@ -199,7 +200,7 @@ class Application():
         except socket.error:
             queue.put((False, address, "none"))
     
-    def get_input(self):
+    def get_input(self,event):
         ''' Pega o conteúdo do que foi digitado e o envia para o servidor '''
         try:
             input = self.input.get()
@@ -214,6 +215,9 @@ class Application():
                 self.sock.send(input.encode())
         except:
             self.writeMsg("Console", "Erro - Servidor desconectado.")
+            self.input.unbind('<Return>')
+            self.input.configure(state=DISABLED)  
+            self.button.unbind('<Button-1>')
             self.button.configure(state=DISABLED)
             self.sock.close()
     
@@ -228,7 +232,8 @@ class Application():
                 self.button.unbind_all
                 self.input.bind("<Return>", self.get_input)
                 self.input.configure(state=NORMAL)
-                self.button.configure(state=NORMAL,command=self.get_input)
+                self.button.bind("<Button-1>", self.get_input)
+                self.button.configure(state=NORMAL)
                 self.writeMsg("Console", "Conectado no servidor " + self.addr_name[input] )
                 self.writeMsg("Console", "Para enviar mensagens, digite o caractere ' / ', o comando e pressione enviar")
                 self.writeMsg("Console", "Para exibir a lista dos comandos, digite /help")
